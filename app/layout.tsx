@@ -6,8 +6,8 @@ export const metadata: Metadata = {
   title: calculatorManifest.seoTitle,
   description: calculatorManifest.seoDescription,
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/logo-dosefy.jpeg",
+    apple: "/logo-dosefy.jpeg",
   },
 };
 
