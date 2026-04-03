@@ -140,7 +140,7 @@ export function CalculatorPageClient({ manifest }: Props) {
 
         {manifest.variantTabs ? (
           <SectionCard title="Versão do cálculo" icon={<FileText className="h-5 w-5" />}>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className={cn("grid gap-3", getOptionGridClass(manifest.variantTabs.options.length))}>
               {manifest.variantTabs.options.map((option) => {
                 const active = values[manifest.variantTabs!.fieldName] === option.value;
 
@@ -152,13 +152,13 @@ export function CalculatorPageClient({ manifest }: Props) {
                     className={cn(
                       "rounded-xl border px-4 py-4 text-left transition-all",
                       active
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border bg-background hover:border-primary/30 hover:bg-muted/40",
+                        ? "border-[#4f97dd] bg-[#4f97dd] text-white shadow-sm"
+                        : "border-border bg-background text-foreground hover:border-[#4f97dd]/40 hover:bg-muted/40",
                     )}
                   >
-                    <span className="block text-sm font-semibold text-foreground">{option.label}</span>
+                    <span className={cn("block text-sm font-semibold", active ? "text-white" : "text-foreground")}>{option.label}</span>
                     {option.description ? (
-                      <span className="mt-1 block text-sm leading-6 text-muted-foreground">{option.description}</span>
+                      <span className={cn("mt-1 block text-sm leading-6", active ? "text-blue-50" : "text-muted-foreground")}>{option.description}</span>
                     ) : null}
                   </button>
                 );
@@ -226,17 +226,36 @@ export function CalculatorPageClient({ manifest }: Props) {
                                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{field.description}</p>
                               ) : null}
                               {field.type === "select" ? (
-                                <select
-                                  value={String(values[field.name] ?? "")}
-                                  onChange={(event) => handleChange(field.name, event.target.value)}
-                                  className={sharedClassName}
-                                >
-                                  {field.options?.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                      {option.label}
-                                    </option>
-                                  ))}
-                                </select>
+                                <div className={cn("mt-2 grid gap-3", getOptionGridClass(getSelectableOptions(field.options).length, field.colSpan))}>
+                                  {getSelectableOptions(field.options).map((option) => {
+                                    const active = String(values[field.name] ?? "") === option.value;
+
+                                    return (
+                                      <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={() => handleChange(field.name, option.value)}
+                                        className={cn(
+                                          "rounded-xl border px-4 py-4 text-left transition-all",
+                                          active
+                                            ? "border-[#4f97dd] bg-[#4f97dd] text-white shadow-sm"
+                                            : "border-border bg-background text-foreground hover:border-[#4f97dd]/40 hover:bg-muted/40",
+                                        )}
+                                      >
+                                        <div className="flex items-start justify-between gap-3">
+                                          <span className={cn("text-sm font-semibold", active ? "text-white" : "text-foreground")}>
+                                            {option.label}
+                                          </span>
+                                          {option.description ? (
+                                            <span className={cn("text-sm font-semibold", active ? "text-white" : "text-foreground")}>
+                                              {option.description}
+                                            </span>
+                                          ) : null}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               ) : (
                                 <div className="relative">
                                   <input
@@ -444,4 +463,24 @@ function BulletList({ items }: { items: string[] }) {
       ))}
     </ul>
   );
+}
+
+function getSelectableOptions(options: CalculatorManifest["fields"][number]["options"]) {
+  return (options ?? []).filter((option) => option.value !== "");
+}
+
+function getOptionGridClass(optionCount: number, colSpan?: 1 | 2) {
+  if (optionCount <= 2) {
+    return "sm:grid-cols-2";
+  }
+
+  if (optionCount === 3) {
+    return "md:grid-cols-3";
+  }
+
+  if (optionCount === 4) {
+    return colSpan === 2 ? "md:grid-cols-2" : "xl:grid-cols-2";
+  }
+
+  return "md:grid-cols-2";
 }
